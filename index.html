@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>读书笔记</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>" />
+  <style>
+    /* ========== Design System - Minimal B&W Reading ========== */
+    :root {
+      --bg: #fafaf9;
+      --bg-card: #ffffff;
+      --bg-sidebar: #f5f5f4;
+      --bg-hover: #f0f0ee;
+      --bg-active: #ebebea;
+      --bg-quote: #fafaf9;
+      --text: #1a1a1a;
+      --text-secondary: #737373;
+      --text-muted: #a3a3a3;
+      --text-faint: #d4d4d4;
+      --accent: #1a1a1a;
+      --accent-light: #404040;
+      --border: #e5e5e5;
+      --border-light: #f0f0f0;
+      --border-active: #1a1a1a;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --radius-xs: 4px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --font: 'Georgia', 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --font-mono: 'Menlo', 'Monaco', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #171717;
+      --bg-card: #1e1e1e;
+      --bg-sidebar: #141414;
+      --bg-hover: #262626;
+      --bg-active: #2a2a2a;
+      --bg-quote: #1c1c1c;
+      --text: #e5e5e5;
+      --text-secondary: #a3a3a3;
+      --text-muted: #737373;
+      --text-faint: #404040;
+      --accent: #e5e5e5;
+      --accent-light: #d4d4d4;
+      --border: #2a2a2a;
+      --border-light: #222222;
+      --border-active: #e5e5e5;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* ========== Reset ========== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 15px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--text-faint); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ========== Layout ========== */
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ========== Top Bar ========== */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 52px; background: var(--bg-card);
+      border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 100;
+    }
+
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-mark {
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      font-family: var(--font-sans); font-weight: 600; color: var(--text);
+    }
+    .logo-divider { width: 1px; height: 16px; background: var(--border); }
+    .logo-sub {
+      font-size: 12px; color: var(--text-muted); font-family: var(--font-sans);
+      font-weight: 400; letter-spacing: 0.5px;
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 16px; }
+
+    .stat-pill {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-muted); font-family: var(--font-sans);
+    }
+    .stat-pill strong { color: var(--text); font-weight: 600; }
+
+    .btn-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-xs);
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--transition); font-family: var(--font-sans);
+    }
+    .btn-icon:hover { background: var(--bg-hover); color: var(--text); border-color: var(--text-muted); }
+
+    /* ========== Main Content ========== */
+    .main-content { display: flex; flex: 1; overflow: hidden; }
+
+    /* ========== Sidebar ========== */
+    .sidebar {
+      width: 280px; min-width: 280px; background: var(--bg-sidebar);
+      border-right: 1px solid var(--border); display: flex;
+      flex-direction: column; overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+    }
+    .sidebar-label {
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+      font-family: var(--font-sans);
+    }
+    .search-box { position: relative; }
+    .search-box input {
+      width: 100%; padding: 8px 12px 8px 32px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--bg-card); color: var(--text);
+      font-size: 13px; font-family: var(--font-sans); outline: none; transition: var(--transition);
+    }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box input::placeholder { color: var(--text-faint); }
+    .search-box svg {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text-faint); width: 14px; height: 14px;
+    }
+
+    /* ========== Book List ========== */
+    .book-list { flex: 1; overflow-y: auto; padding: 8px 8px; }
+
+    .book-item {
+      padding: 14px 16px; border-radius: var(--radius-sm); cursor: pointer;
+      transition: var(--transition); margin-bottom: 1px;
+      border-left: 2px solid transparent;
+    }
+    .book-item:hover { background: var(--bg-hover); }
+    .book-item.active {
+      background: var(--bg-card); border-left-color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .book-title {
+      font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 4px;
+      font-family: var(--font-sans); color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .book-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text-muted); font-family: var(--font-sans);
+    }
+    .book-author {
+      max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .book-count {
+      margin-left: auto; font-size: 11px; color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ========== Content Area ========== */
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Book Header */
+    .book-header {
+      padding: 32px 48px 24px; border-bottom: 1px solid var(--border);
+      background: var(--bg-card); flex-shrink: 0;
+    }
+    .book-header-inner { max-width: 720px; }
+    .book-header h1 {
+      font-size: 24px; font-weight: 400; letter-spacing: 0.5px;
+      line-height: 1.4; margin-bottom: 8px; font-family: var(--font);
+    }
+    .book-header .author {
+      font-size: 14px; color: var(--text-secondary); font-family: var(--font-sans);
+    }
+    .book-header .author span { color: var(--text); font-weight: 500; }
+
+    .header-stats {
+      display: flex; gap: 24px; margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+    }
+    .header-stat {
+      display: flex; align-items: baseline; gap: 6px;
+      font-size: 13px; color: var(--text-muted); font-family: var(--font-sans);
+    }
+    .header-stat .num {
+      font-size: 20px; font-weight: 300; color: var(--text);
+      font-family: var(--font-mono);
+    }
+
+    /* ========== Highlights Content ========== */
+    .highlights-content {
+      flex: 1; overflow-y: auto; padding: 32px 48px 64px;
+    }
+
+    .chapter-section {
+      margin-bottom: 40px;
+      animation: fadeIn 0.4s ease both;
+    }
+    .chapter-section:nth-child(1) { animation-delay: 0.05s; }
+    .chapter-section:nth-child(2) { animation-delay: 0.1s; }
+    .chapter-section:nth-child(3) { animation-delay: 0.15s; }
+    .chapter-section:nth-child(4) { animation-delay: 0.2s; }
+    .chapter-section:nth-child(5) { animation-delay: 0.25s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chapter-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 13px; font-family: var(--font-sans);
+      color: var(--text-muted); margin-bottom: 20px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border-light);
+      letter-spacing: 0.3px; font-weight: 500;
+    }
+    .chapter-num {
+      font-size: 11px; font-family: var(--font-mono); color: var(--text-faint);
+      min-width: 20px;
+    }
+    .chapter-count {
+      margin-left: auto; font-size: 11px; color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+
+    /* ========== Highlight Card - 极简引用风格 ========== */
+    .highlight-card {
+      position: relative; padding: 16px 0 16px 24px; margin-bottom: 4px;
+      border-left: 1px solid var(--border); cursor: default;
+      transition: var(--transition);
+    }
+    .highlight-card:hover {
+      border-left-color: var(--accent);
+    }
+    .highlight-card:hover .hl-marker {
+      background: var(--accent);
+    }
+
+    .hl-marker {
+      position: absolute; left: -3px; top: 22px;
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--text-faint); transition: var(--transition);
+    }
+
+    .highlight-text {
+      font-size: 15px; line-height: 1.85; color: var(--text);
+      font-family: var(--font); white-space: pre-wrap;
+      max-width: 680px;
+    }
+
+    .highlight-actions {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 8px; opacity: 0; transition: var(--transition);
+    }
+    .highlight-card:hover .highlight-actions { opacity: 1; }
+
+    .hl-action-btn {
+      padding: 3px 10px; border-radius: var(--radius-xs); border: none;
+      background: transparent; color: var(--text-muted); font-size: 11px;
+      cursor: pointer; transition: var(--transition); font-family: var(--font-sans);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .hl-action-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+    /* ========== Welcome State ========== */
+    .welcome-state {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; padding: 40px;
+    }
+    .welcome-quote {
+      font-size: 20px; font-style: italic; color: var(--text-secondary);
+      max-width: 400px; line-height: 1.8; margin-bottom: 24px;
+      font-family: var(--font);
+    }
+    .welcome-hint {
+      font-size: 13px; color: var(--text-muted); font-family: var(--font-sans);
+    }
+
+    /* ========== Toast ========== */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--text); color: var(--bg);
+      padding: 10px 20px; border-radius: var(--radius);
+      font-size: 13px; font-family: var(--font-sans); z-index: 1000;
+      opacity: 0; transition: all 0.3s ease; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ========== Modal ========== */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px); z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: var(--transition);
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); width: 90%; max-width: 560px;
+      max-height: 80vh; overflow-y: auto; padding: 32px;
+      box-shadow: var(--shadow-lg); transform: scale(0.96); transition: var(--transition);
+    }
+    .modal-overlay.show .modal { transform: scale(1); }
+
+    .modal h2 {
+      font-size: 16px; font-weight: 600; margin-bottom: 24px;
+      font-family: var(--font-sans); letter-spacing: -0.3px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .summary-card {
+      padding: 20px 16px; border-radius: var(--radius-sm); text-align: center;
+      background: var(--bg-sidebar); border: 1px solid var(--border-light);
+    }
+    .summary-card .num {
+      font-size: 28px; font-weight: 300; color: var(--text);
+      font-family: var(--font-mono); line-height: 1;
+    }
+    .summary-card .desc {
+      font-size: 11px; margin-top: 8px; color: var(--text-muted);
+      font-family: var(--font-sans);
+    }
+
+    .summary-book-list { list-style: none; }
+    .summary-book-list li {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border-light);
+      font-size: 13px; font-family: var(--font-sans);
+    }
+    .summary-book-list li:last-child { border-bottom: none; }
+    .summary-book-list .book-name { font-weight: 500; flex: 1; color: var(--text); }
+    .summary-book-list .book-hl {
+      font-size: 12px; font-family: var(--font-mono); color: var(--text-muted);
+    }
+
+    .chart-container {
+      margin-top: 20px; padding: 16px;
+      background: var(--bg-sidebar); border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+    }
+    .chart-container h4 {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 14px;
+      text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-sans);
+    }
+    .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label {
+      width: 80px; font-size: 12px; color: var(--text-secondary); text-align: right;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-family: var(--font-sans);
+    }
+    .bar-track {
+      flex: 1; height: 3px; background: var(--border-light);
+      border-radius: 2px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 2px; background: var(--text-muted);
+      transition: width 0.8s ease; min-width: 2px;
+    }
+    .bar-value {
+      width: 28px; font-size: 12px; color: var(--text-muted); text-align: left;
+      font-family: var(--font-mono);
+    }
+
+    /* ========== Mobile ========== */
+    .mobile-menu-btn { display: none; }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed; left: -280px; top: 52px; bottom: 0;
+        z-index: 50; box-shadow: var(--shadow-lg); transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .mobile-overlay {
+        position: fixed; inset: 0; top: 52px;
+        background: rgba(0,0,0,0.2); z-index: 49; display: none;
+      }
+      .mobile-overlay.show { display: block; }
+      .book-header { padding: 24px 20px 20px; }
+      .highlights-content { padding: 20px 20px 40px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .mobile-menu-btn { display: flex !important; }
+      .stat-pill { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="top-bar">
+      <div class="logo">
+        <span class="logo-mark">WeRead</span>
+        <span class="logo-divider"></span>
+        <span class="logo-sub">Notes</span>
+      </div>
+      <div class="top-actions">
+        <div class="stat-pill" id="globalStats"></div>
+        <button class="btn-icon" id="summaryBtn" title="概览">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <button class="btn-icon" id="toggleTheme" title="切换主题">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn-icon mobile-menu-btn" id="mobileMenuBtn" title="书架">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-label">书架</div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="searchInput" placeholder="搜索..." />
+          </div>
+        </div>
+        <div class="book-list" id="bookList"></div>
+      </aside>
+
+      <div class="mobile-overlay" id="mobileOverlay"></div>
+
+      <div class="content-area" id="contentArea">
+        <div class="welcome-state" id="welcomeState">
+          <div class="welcome-quote">"一个人的精神发育史，就是他的阅读史。"</div>
+          <div class="welcome-hint">从书架中选择一本书，开始阅读笔记</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="summaryModal"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <!-- JSON Data -->
+  <script id="notes-data" type="application/json">
+{"exportDate":"2026-03-13","totalBooks":6,"totalHighlights":137,"books":[{"id":1,"title":"少有人走的路：心智成熟的旅程","author":"M.斯科特·派克","noteCount":41,"highlightCount":37,"chapters":[{"title":"第一部分 自律","highlights":["自律是解决人生问题最主要的工具，也是消除人生痛苦最重要的方法。"]},{"title":"子不教，谁之过","highlights":["他们提醒自己：\u201c既然爸爸妈妈愿意陪着我忍受痛苦，痛苦就不见得那么可怕，而且也未必是太坏的事。我也应该承担责任，面对属于自己的痛苦。\u201d\u2014\u2014这就是自律的起点。","如果我们认为自己很有价值，就会认为我们的时间也很有价值，如此有价值的时间必须要加以善用。"]},{"title":"解决问题的时机","highlights":["假如那天我缺乏耐心，或许就会把脑袋伸到汽车仪表板下，胡乱扯几根线头，见没有效果就耸耸肩、摊摊手说：\u201c对不起，我搞不清楚是怎么回事，我想我没办法帮你的忙。\u201d","问题没有消失，它仍然继续存在，仍然妨碍着心灵的成长和心智的成熟。","忽视问题的存在，反映出人们不愿推迟满足感的心理。"]},{"title":"神经官能症与人格失调症","highlights":["神经官能症患者为自己强加责任，人格失调症患者则不愿承担原本属于自己的责任。与外界发生矛盾时，神经官能症患者认为错在自己，人格失调症患者则把错误归咎于旁人。","神经官能症患者让自己活得痛苦，人格失调症患者让别人活得痛苦。","你不能解决问题，你就会成为问题。"]},{"title":"逃避自由","highlights":["作为成年人，他们一生都充满选择和决定的机会。接受这一事实，就会变成自由的人；无法接受这种事实，就会永远觉得自己是个牺牲品。"]},{"title":"忠于事实","highlights":["一旦新的信息与过去的观念发生冲突，需要对地图大幅度修正，我们就会感到恐惧，宁可对新的信息视而不见。"]},{"title":"移情：过时的地图","highlights":["他最初的结论是：\u201c我不能相信父母，他们是不值得信任的。\u201d后来进一步升级移情为：\u201c我不能相信任何人，没有谁是靠得住的。","逃避现实的痛苦是人类的天性，只有通过自律，我们才能逐渐克服现实的痛苦，及时修改自己的地图，逐步成长。","要让心灵获得成长，心智走向成熟，就要竭尽全力，不惜一切代价，完全忠于事实。"]},{"title":"保持平衡","highlights":["我想不管是谁，经过人生旅途的急转弯时，都必须放弃某些快乐，放弃属于自己的某一部分。除非永远停留在原地，中止生命之旅，否则这样的放弃是不可避免的。"]},{"title":"关注的艺术","highlights":["父母和孩子都可以从爱的互惠中，感受到成长和进步的力量。价值创造价值，爱诞生爱，父母与孩子在爱的默契配合中，就像是跳起双人芭蕾舞，在舞台上共同旋转，动作流畅而敏捷。"]},{"title":"失落的风险","highlights":["爱意味着自我界限的拓展，也就是让自我拓展到陌生领域，再塑造出一个不同的、崭新的自己，这一过程是自我完善的过程。","我们只知她尽力避免与人接触，不想冒险与别人打交道，也从未想过要拓展自己的自我界限，去实现自我完善。她宁可让自己越来越萎缩，哪怕缩得像影子一样。她不愿为别人知晓，不愿受人打扰。","给予某种事物以精神贯注，可能面临拒绝或遭受损失；接近某个人，就可能经受失去对方的危险，让我们再次回到孤独寂寞的状态。","如果不想经受个中痛苦，就必须放弃生活中的许多事物，包括子女、婚姻、性爱、晋升和友谊，但唯有这些事物才能够使人生丰富多彩。","完整的人生势必伴随着痛苦，其中最大的痛苦之一，就是心爱之人或心爱之物的逝去。如果你想避免其中的痛苦，那你恐怕只有完全脱离现实，去过没有任何意义的生活。","她不想经受任何痛苦，由此放弃了心灵的成长，哪怕活得如同行尸走肉。","万物永远处在变化中，死亡是一种正常现象，不肯接受这一事实，我们就永远无法体味生命的宏大意义。"]},{"title":"独立的风险","highlights":["人生是一场冒险。你投入的爱越多，经受的风险也就越大。我们一生要经历数以千计乃至百万计的风险，而最大的风险就是成长，也就是走出童年的朦胧和混沌状态，迈向成年的理智与清醒","最后一年，我几乎整天睡觉，仿佛只有睡觉才能带来舒适和自由。现在回想起来，我当时整天昏睡，可能恰恰是潜意识正在为即将到来的跨越做准备。","他们沿袭上一代的价值标准，做任何事都要得到父母的\u201c批准\u201d，即使父母早已离开人世，他们心理上仍旧难以摆脱依赖的情结。他们从来就不能真正主宰自己的命运。","至高境界的爱，必然是自由状态下的自主选择，而不是墨守成规，被动而消极地抗拒心灵的呼唤。"]},{"title":"投入的风险","highlights":["假如我们从小就生活在不稳定的情感关系里，内心就会缺乏安全感，不仅时刻担心遭到遗弃，而且感觉前途渺茫，心智就永远不可能达到成熟。","不知道如何实现精神贯注，也不愿意做出任何承诺，就很容易造成心理失调","你说得没错，\u201d雷切尔说，\u201c这正是我的感觉。我不觉得我有权利去要求别人。","如果童年时没有从父母那里得到爱，就会产生极大的不安全感，到了成年时，就会出现一种特殊的心理疾病\u2014\u2014他们总是先发制人地\u201c抛弃\u201d对方，即采取\u201c在你抛弃我之前，我得先抛弃你\u201d的模式。","雷切尔跟别人的关系越亲近，就越担心遭到抛弃，这正是\u201c在你抛弃我之前，我得先抛弃你\u201d这种模式所起的作用","腹背受敌的士兵没有选择，只能面对；而一个处于心灵成长中的人通常都会退缩到以前熟悉而又狭隘的方式中，拒绝成长。"]},{"title":"冲突的风险","highlights":["爱的最大风险之一，是发生冲突时的指责和假谦虚，即我们常常以爱的名义去指责所爱的人","诚实和谦虚，意味着有自知之明。善于自我反省的人，才会表现得诚实和谦虚","想让别人听你的话，就要采用对方能理解的语言；想让别人满足你的要求，要求内容就不能超过对方承受的限度；想让对方有所进步，首先就要进行自我完善，这样才能找到沟通的最佳契机和方式。"]},{"title":"爱与心理治疗","highlights":["15年前，我进入心理治疗这一行，当时怀有怎样的动机，现在已经不大记得了。当然，我相信自己志在助人。其他医学门类也有助于人类健康，但在我看来，其治疗程序过于机械化，我难以适应。我觉得与患者深入沟通，比起把手放到患者身上摸来摸去地检查病情要有趣得多。人类心智的成熟过程，也比肉体或病毒的变化更吸引我。"]},{"title":"第三部分 成长与信仰","highlights":["人人都有自己的信仰，对人生的认识和了解就属于信仰的范畴。"]},{"title":"信仰与世界观","highlights":["一个人的信仰与世界观，只有一小部分属于意识层面。多数患者无法体验到自己的潜意识内容，以及对世界真正的看法和整体的观念。他们自认为笃信某种宗教，其实信仰的却是另一种东西。"]},{"title":"科学与信仰","highlights":["有关人类生存的意义、目的与死亡的问题，一切二手材料我都无法接受。我不可能依靠对\u201c二手上帝\u201d的\u201c二手信仰\u201d来生活。我要想真正地活着，就必须拥有自己的语言，拥有独一无二的怀疑与挑战的意识。"]},{"title":"潜意识的奇迹","highlights":["为在复杂的社会上获得生存，找到自己的位置，我们人人都戴上了面具。"]}]},{"id":2,"title":"认知觉醒：开启自我改变的原动力","author":"周岭","noteCount":26,"highlightCount":22,"chapters":[{"title":"结语 一流的生活不是富有，而是觉知","highlights":["如果一直被外界的安排牵着走，即便每天过得很\u201c充实\u201d，又有什么意义呢？","我的方法很简单，就是留意每天生活中最触动自己的点。","比如我们脑袋里会时不时地冒出一个灵感，那种对生活的顿悟让人神清气爽，亢奋异常，但是如果不注意记录，很可能转眼就忘了。","因为灵感虽然是一瞬间冒出来的，但其背后却是一段生活经历的积累。","一是不要被形式所缚。"]},{"title":"第四章 专注力\u2014\u2014情绪和智慧的交叉地带","highlights":["换句话说，就是分心走神的成本太低，而人的天性又是急于求成和避难趋易的，所以在默认情况下，我们都会不自觉地待在精神舒适区内。\n可惜\u201c走神一时爽\u201d，事后我们就得承担走神带来的各种损失，其中最大的损失莫过于生命质量变差。因为走神时，我们要么沉浸过去，要么担忧将来，要么幻想不可能实现的情况，走神可以让我们活在任何时候，唯独不能让我们活在当下。\n而生命是由当下的一个个片段组成的，身心合一的片段组成的就是幸福专注的高质量人生，身心分离的片段组成的就是分心走神的低质量人生。分心走神还会造成拖延和低效，因为情绪总是滞后于行为，所以人们做事时进入状态往往很慢，需要情绪过渡。","可见，分心走神的本质是逃避，所以，面对困难时，身心分离的人总会不自觉地退回舒适区，而身心合一的人则更容易跳出舒适区，直面困难。\n从长远看，一个人专注力的高低可能预示了他今后成就的大小。比尔\u00b7盖茨与沃伦\u00b7巴菲特第一次相识的时候，盖茨的父亲就分别给他们一人一张卡片，让他们在上面各写一个词，描述究竟是什么成就了自己。结果两个人的答案竟然一模一样，都是专注。\n当然，我们也无须为自己的分心走神过于自责，因为从微观来看，分心走神原本就是我们的天性之一。不仅是你，所有人都一样。这背后的原因与我们大脑的记忆机制有关。\n论记忆能力，人类肯定比不上计算机，无论在容量上还是在精确度上，我们都不具优势，但这并不影响我们提取记忆的速度，因为人类的大脑使用背景关联记忆的方法，即借助事情的背景或线索等提示信息来让我们想起特定内容，比如我们只根据名字、声音、时间或场景等任意要素就能瞬间想起某人、某事，而计算机则会平等地处理所有信息，每次提取信息都要从数据库中挨个搜索一遍。"]},{"title":"第七章 情绪力\u2014\u2014情绪是多角度看问题的智慧","highlights":["这种状态下，他们总是显得缺乏耐心、目光短浅，无论行动力、自控力、反应速度，还是智商表现都比较差。","在一定的前提下，贫穷确实会使人变笨，这不是因为贫穷让人能力不足，而是因为贫穷造成的稀缺俘获了人的注意力，进而降低了人的心智带宽。","这些现象的出现都是因为当事人心智带宽不足，自己无力考虑长远问题，难以保持耐心和专注，在面临选择的时候不自觉地偏向那个最安全、最能快速见效的选项。","任何能制造压力的事件都会挤占我们的心智带宽","现代社会虽然给我们提供了更多便利和选择，同时也带来了前所未有的快节奏，仿佛一不留神就会落在队伍后面，这不由得迫使每个人加快脚步，不自觉地想要更多优势。","物质条件无法决定我们的命运，真正影响我们的是心智带宽是否富足。","我时常站在一生的高度去审视自己真正要做的是什么，然后打破思维定式，拒绝所有那些即使不去做天也不会塌下来的事情。\u201d","真正的行动力高手不是有能耐在同一时间做很多事的人，而是会想办法避免同时做很多事的人。","第一，贼偷去的是我的东西，而没伤害我的生命；第二，贼只偷去我的部分东西，而不是全部；第三，最值得庆幸的是，做贼的是他，而不是我。\u201d","在\u201c相机\u201d这件事情上，我们一定要保持觉知，要清醒地意识到自己的视角偏误，时刻做好向上升级、向下兼容的准备。拥有这种心态，不仅我们自己能越来越完善，还能与其他人都合得来。","要想拥有多视角能力，就要进行刻意练习，直到形成新的路径依赖。","我并不是在做这件事，我只是在做另外一件事。"]},{"title":"第八章 早冥读写跑，人生五件套\u2014\u2014成本最低的成长之道","highlights":["我们把书从书架上取下或在网上点下付款按钮的一瞬间，那种快感简直无与伦比\u2014\u2014似乎只要占有这些书籍，这些知识就变成了自己的，但真到翻开书时，就兴趣全无了。","每读一本书实际上就是在进行一次名人访谈，就是在和顶级的专家交流谈话。","脚步不能丈量的地方，文字可以；眼睛无法看到的地方，文字可以","在现代社会，人与人之间的根本差异是认知能力上的差异，而认知能力极度依赖思考能力，可以说，思考能力是我们立足现代社会的根本竞争力。所以，目光长远的人都会主动、刻意地磨炼自己，尽力提高每天的思考密度。","真正读好一本书，往往需要花费数倍于阅读的时间去思考和实践，并输出自己的东西\u2014\u2014可能是一篇文章，也可能是养成一个习惯\u2014\u2014这个过程比阅读本身要费力得多。","第二个是读写不分家。如果你在阅读后还能把所学知识用自己的语言重新阐释，甚至将它们教授给他人，那这个知识将在你脑中变得非常牢固。","如果长期坚持\u201c运动+学习\u201d模式，脑子会不知不觉地变得越来越灵活。"]}]},{"id":3,"title":"高敏感人群自救手册：如何摆脱精神内耗，建立安全感","author":"韩雅男","noteCount":20,"highlightCount":20,"chapters":[{"title":"1.3 多疑、脆弱，都是对高敏感的偏见","highlights":["他们对其进行加工处理，从而表现出与常人不太一样的过度反应，这就是高敏感人群。","敏感的人是透过滤镜看世界的，在这个滤镜的作用下，他们看到的世界有着更高的对比度与饱和度。因此，他们一直是用一种更生动、更激烈的方式感受着这个世界。"]},{"title":"4.4 你心心念念的完美，正在吞噬你的自信","highlights":["难以接受他人的批评与挑剔，一听到不同或反对的意见，情绪就会产生波动。","不会陷入\u201c不完美就是失败\u201d的极端思维中，相信可以通过努力\u201c不断接近完美\u201d。"]},{"title":"4.6 不要用苛刻的标准评判自己的行为","highlights":["他们认为，自己必须按照那些规则行事，哪怕有些规则已经过时，对现在的自己不再适用。","高标准往往是和低自尊联系在一起的，从某种意义上来说，高标准是低自尊的一种补偿策略。越认为自己不值得被爱，越会努力去遵循高标准，试图让自己值得被爱。"]},{"title":"5.4 你的情绪无法定义你，你只是在体验它","highlights":["如果悲伤的情绪可以代表你，那么你生命中的每分每秒都应该是悲伤的；但你也发现了，即便经历过许多不如意，乃至在某一时刻感觉全世界都是灰暗的，可是悲伤的情绪并没有一直持续。","这些情绪更像是来来去去的过客。你的情绪是真实的，但它们无法定义你。你需要和你的情绪保持健康的距离。","你是情绪的体验者、见证者，情绪不能代表你。这样的描述，能够给你留出心理空间，让你从情绪中抽离。"]},{"title":"5.7 当恐惧来袭，试着用驾驭的方式应对","highlights":["恐惧的出现都是为了保护我们，让我们提高警觉，意识到有风险和威胁存在。当我们把恐惧当成一种保护机制时，就会减少对它的厌恶与排斥。"]},{"title":"6.4 别高估了自己对他人的真实影响","highlights":["如果不小心犯了错，或是做了一些尴尬举动，即使别人看向你，你也不要脑补太多的东西。别人大都是无意识地瞥一眼或留意环境的变化，"]},{"title":"6.7 过分关注自我，只会加剧焦虑","highlights":["要避免过度地自我关注，最关键的一点就是把注意力更多地集中在身边的事情上，而不是自己内心的消极想法、感觉或情绪上。","按照想象中的\u201c理想行为\u201d去要求自己，本身就是在给自己制造压力。按照现实原则，只要选择感觉舒服或对自己有益的方式就好了，大可不必为自己的行为模式感到不安。"]},{"title":"7.3 斩断亲职化，把父母的责任还给他们","highlights":["作为女儿的她，更多的不是被妈妈照顾，而是反过来要牺牲自己的感受，去照顾、安慰、关注并满足妈妈的感性需求与理性需求。这种亲子关系，在心理学上被称为\u201c亲职化\u201d。","职化关系最持久、最困扰人的影响之一，就是子女在成年后情绪会十分敏感，很容易被他人的负面情绪传染，将其内化到自己心中，沉浸在这种情绪里难以自拔。他们会时刻关注和琢磨别人的感受，别人心情不好时，他们也会感到不舒服，且很多时候都需要获得他人的好感和认同。"]},{"title":"7.4 放弃全能自恋，分离自己与他人的课题","highlights":["当一个人心情不好，希望独自待一会儿时，你要明白，这份沮丧的情绪是属于他的。即使你感受到了他的烦闷，也不要觉得自己有义务和责任把他从烦闷中拉出来，这是过度共情的表现","这一点是高敏感者要特别注意的。过度共情总是让你忍不住想要对他人的情绪负责，你要学会克制这种冲动，不做取悦对方的行为。"]},{"title":"7.6 与其勉为其难，不如勇敢说\u201c不\u201d","highlights":["人是无法欺骗自己的，违心地选择了接受，内心的不情愿不会放过自己，它会不时地搅乱你的安宁，让你不开心。"]},{"title":"8.1 撕下虚假自我的面具，世界不会坍塌","highlights":["有时，明明知道一个群体并不适合自己，却在里面停留很久，且安慰自己说，只要足够努力，一定可以被接纳和认可。久而久之，就忘记了真实的自己，在憋屈的生活现状中沉闷地活着。"]},{"title":"8.4 自我照顾不是自私，无须感到内疚","highlights":["另外，高敏感者的感官很容易受到过度刺激，故而更需要给自己留出\u201c空白时间\u201d，让感官得以休息。"]}]},{"id":4,"title":"卡拉马佐夫兄弟（套装上下册）（陀思妥耶夫斯基文集2015）","author":"陀思妥耶夫斯基","noteCount":2,"highlightCount":2,"chapters":[{"title":"作者的话","highlights":["我实实在在的告诉你们：一粒麦子落在地里如若不死，仍旧是一粒；若是死了，就会结出许多子粒来。"]},{"title":"第一卷 一户人家的历史","highlights":["那是他对青年时代保留的最最愉快的回忆之一。他有一份独立的田产，按老法估算，大约有一千农奴。"]}]},{"id":5,"title":"阿莱夫","author":"豪尔赫\u00b7路易斯\u00b7博尔赫斯","noteCount":6,"highlightCount":6,"chapters":[{"title":"永生","highlights":["所罗门说：普天之下并无新事。正如柏拉图阐述一切知识均为回忆；所罗门也有一句名言：一切新奇事物只是忘却。","斗室或者枯井的华丽的门户、梯级和扶手朝下反装的难以置信的楼梯。","我想，对他来说，也许没有客体可言，有的只是一系列使他眼花缭乱的短暂的印象。","他说：\u201c很少。比最差的游唱歌手还少。我最初创作《奥德赛》以来，已经过了一千一百年。\u201d","我曾是荷马；不久之后，我将像尤利西斯一样，谁也不是；不久之后，我将是众生：因为我将死去。"]},{"title":"釜底游鱼","highlights":["一个布宜诺斯艾利斯的郊区居民，一个除了好勇斗狠之外一无可取的无赖泼皮，投身巴西边境骑手纵横的荒漠，妄想成为走私贩子的头目。"]}]},{"id":6,"title":"敢于冲突：活出必要的攻击性","author":"黄玉玲","noteCount":7,"highlightCount":7,"chapters":[{"title":"推荐序","highlights":["攻击性就是生命力！\u201d","你变得不敢表达，不敢捍卫自己，总是忍气吞声，生命不断萎缩，并且，你很容易成为滥好人，努力压制、拼命付出，然而你还会悲哀地发现，你的好并不能换来认可，特别是不能换来亲密，甚至会被辜负和背叛。"]},{"title":"推荐序 敢于冲突","highlights":["玲说，要定，要容，要真。深以为然。\n定，是守住具身感受保持心理边界；\n容，是虚怀若谷与欲望保持张力；\n真，是胆敢行动胆敢冲突践行本真。"]},{"title":"第一部分 看见攻击性","highlights":["当受到的伤害被看见、被承认、被尊重时，自身的攻击性冲动就会减弱，你就会感受到真实呈现带来的一种力量之美，这就是真实地面对自己的情感带来的改变。"]},{"title":"二 攻击性之流动之美","highlights":["如果你被外在照顾者关照过，你的内心会留下这些经验，渐渐你也学习到了怎么照顾自己。我们每个人都能够发展出这样的心理功能。"]},{"title":"互动：看见，是转化攻击性的灵丹妙药","highlights":["这位读者能这样表达出来，就意味着他心里并不是真的想要恶意伤害对方，这里更像是，在有情绪的时刻，不太能控制好自己的情绪张力。","也许这里面既有压抑，也有放任的部分，那么我们可以分别去了解压抑了什么，以及放任了什么。"]}]}]}
+  </script>
+
+  <script>
+    // ========== State ==========
+    var notesData = null;
+    var activeBookId = null;
+    var highlightStore = {};
+
+    // ========== Load Data ==========
+    function loadData() {
+      try {
+        var el = document.getElementById('notes-data');
+        if (!el) return null;
+        return JSON.parse(el.textContent);
+      } catch (e) {
+        console.error('JSON parse error:', e);
+        return null;
+      }
+    }
+
+    // ========== Init ==========
+    function init() {
+      try {
+        notesData = loadData();
+        if (!notesData || !notesData.books || notesData.books.length === 0) {
+          document.getElementById('contentArea').innerHTML =
+            '<div class="welcome-state"><div class="welcome-quote">数据加载失败</div></div>';
+          return;
+        }
+        renderGlobalStats();
+        renderBookList();
+        selectBook(notesData.books[0].id);
+      } catch (err) {
+        console.error('Init error:', err);
+      }
+    }
+
+    // ========== Global Stats ==========
+    function renderGlobalStats() {
+      var el = document.getElementById('globalStats');
+      el.innerHTML = '<strong>' + notesData.totalBooks + '</strong> 本 · <strong>' +
+        notesData.totalHighlights + '</strong> 条划线';
+    }
+
+    // ========== Book List ==========
+    function renderBookList(filter) {
+      filter = filter || '';
+      var el = document.getElementById('bookList');
+      var books = notesData.books.filter(function(b) {
+        if (!filter) return true;
+        var f = filter.toLowerCase();
+        return b.title.toLowerCase().indexOf(f) >= 0 || b.author.toLowerCase().indexOf(f) >= 0;
+      });
+      el.innerHTML = books.map(function(book) {
+        return '<div class="book-item ' + (book.id === activeBookId ? 'active' : '') +
+          '" data-id="' + book.id + '" onclick="selectBook(' + book.id + ')">' +
+          '<div class="book-title">' + escapeHtml(book.title) + '</div>' +
+          '<div class="book-meta"><span class="book-author">' + escapeHtml(book.author) +
+          '</span><span class="book-count">' + book.highlightCount + '</span></div></div>';
+      }).join('');
+    }
+
+    // ========== Select Book ==========
+    function selectBook(id) {
+      activeBookId = id;
+      var book = null;
+      for (var i = 0; i < notesData.books.length; i++) {
+        if (notesData.books[i].id === id) { book = notesData.books[i]; break; }
+      }
+      if (!book) return;
+      var items = document.querySelectorAll('.book-item');
+      for (var j = 0; j < items.length; j++) {
+        if (parseInt(items[j].getAttribute('data-id')) === id) {
+          items[j].classList.add('active');
+        } else {
+          items[j].classList.remove('active');
+        }
+      }
+      closeMobileSidebar();
+      renderBookContent(book);
+    }
+
+    // ========== Book Content ==========
+    function renderBookContent(book) {
+      var area = document.getElementById('contentArea');
+      var totalHL = 0;
+      for (var i = 0; i < book.chapters.length; i++) totalHL += book.chapters[i].highlights.length;
+
+      var chaptersHTML = '';
+      for (var ci = 0; ci < book.chapters.length; ci++) {
+        chaptersHTML += renderChapter(book.chapters[ci], ci);
+      }
+
+      area.innerHTML =
+        '<div class="book-header"><div class="book-header-inner">' +
+        '<h1>' + escapeHtml(book.title) + '</h1>' +
+        '<div class="author">\u4F5C\u8005 <span>' + escapeHtml(book.author) + '</span></div>' +
+        '<div class="header-stats">' +
+        '<div class="header-stat"><span class="num">' + book.chapters.length + '</span> 章节</div>' +
+        '<div class="header-stat"><span class="num">' + totalHL + '</span> 划线</div>' +
+        '</div></div></div>' +
+        '<div class="highlights-content">' + chaptersHTML + '</div>';
+    }
+
+    // ========== Chapter ==========
+    function renderChapter(chapter, index) {
+      var hlHTML = '';
+      for (var hi = 0; hi < chapter.highlights.length; hi++) {
+        hlHTML += renderHighlight(chapter.highlights[hi], index + '-' + hi);
+      }
+      return '<div class="chapter-section">' +
+        '<div class="chapter-title">' +
+        '<span class="chapter-num">' + String(index + 1).padStart(2, '0') + '</span>' +
+        '<span>' + escapeHtml(chapter.title) + '</span>' +
+        '<span class="chapter-count">' + chapter.highlights.length + '</span></div>' +
+        hlHTML + '</div>';
+    }
+
+    // ========== Highlight ==========
+    function renderHighlight(text, key) {
+      highlightStore[key] = text;
+      var displayText = text.length > 300 ? text.substring(0, 300) + '\u2026' : text;
+      return '<div class="highlight-card" id="hl-' + key + '">' +
+        '<div class="hl-marker"></div>' +
+        '<div class="highlight-text">' + escapeHtml(displayText) + '</div>' +
+        '<div class="highlight-actions">' +
+        '<button class="hl-action-btn" onclick="copyHighlight(\'' + key + '\')">' +
+        '\u590D\u5236</button></div></div>';
+    }
+
+    // ========== Copy ==========
+    function copyHighlight(key) {
+      var text = highlightStore[key];
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showToast('\u5DF2\u590D\u5236');
+        }).catch(function() { fallbackCopy(text); });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('\u5DF2\u590D\u5236');
+    }
+
+    // ========== Toast ==========
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(function() { el.classList.remove('show'); }, 1800);
+    }
+
+    // ========== Theme ==========
+    document.getElementById('toggleTheme').addEventListener('click', function() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      if (current === 'dark') {
+        html.removeAttribute('data-theme');
+        this.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        this.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+      }
+    });
+
+    // ========== Search ==========
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      renderBookList(e.target.value);
+    });
+
+    // ========== Summary Modal ==========
+    document.getElementById('summaryBtn').addEventListener('click', showSummaryModal);
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === e.currentTarget) closeSummaryModal();
+    });
+
+    function showSummaryModal() {
+      var modal = document.getElementById('summaryModal');
+      var totalChapters = 0, maxHL = 0;
+      for (var i = 0; i < notesData.books.length; i++) {
+        totalChapters += notesData.books[i].chapters.length;
+        if (notesData.books[i].highlightCount > maxHL) maxHL = notesData.books[i].highlightCount;
+      }
+      var booksHTML = '', barsHTML = '';
+      for (var j = 0; j < notesData.books.length; j++) {
+        var b = notesData.books[j];
+        booksHTML += '<li><span class="book-name">' + escapeHtml(b.title) +
+          '</span><span class="book-hl">' + b.highlightCount + '</span></li>';
+        barsHTML += '<div class="bar-row"><span class="bar-label" title="' + escapeHtml(b.title) + '">' +
+          escapeHtml(truncate(b.title, 8)) + '</span><div class="bar-track"><div class="bar-fill" style="width:' +
+          (b.highlightCount / maxHL * 100).toFixed(1) + '%"></div></div><span class="bar-value">' +
+          b.highlightCount + '</span></div>';
+      }
+      modal.innerHTML =
+        '<h2>\u6982\u89C8</h2>' +
+        '<div class="summary-grid">' +
+        '<div class="summary-card"><div class="num">' + notesData.totalBooks + '</div><div class="desc">书籍</div></div>' +
+        '<div class="summary-card"><div class="num">' + notesData.totalHighlights + '</div><div class="desc">划线</div></div>' +
+        '<div class="summary-card"><div class="num">' + totalChapters + '</div><div class="desc">章节</div></div></div>' +
+        '<ul class="summary-book-list">' + booksHTML + '</ul>' +
+        '<div class="chart-container"><h4>划线分布</h4><div class="bar-chart">' + barsHTML + '</div></div>';
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    function closeSummaryModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    // ========== Mobile ==========
+    var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('mobileOverlay').classList.toggle('show');
+      });
+    }
+    var mobileOverlay = document.getElementById('mobileOverlay');
+    if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileSidebar);
+
+    function closeMobileSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobileOverlay').classList.remove('show');
+    }
+
+    // ========== Keyboard ==========
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeSummaryModal();
+      if (!notesData) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        var idx = -1;
+        for (var i = 0; i < notesData.books.length; i++) {
+          if (notesData.books[i].id === activeBookId) { idx = i; break; }
+        }
+        var next;
+        if (e.key === 'ArrowDown') next = Math.min(idx + 1, notesData.books.length - 1);
+        else next = Math.max(idx - 1, 0);
+        selectBook(notesData.books[next].id);
+      }
+    });
+
+    // ========== Utils ==========
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/\n/g, '<br/>');
+    }
+    function truncate(str, len) {
+      return str.length > len ? str.substring(0, len) + '\u2026' : str;
+    }
+
+    // ========== Start ==========
+    init();
+  </script>
+</body>
+</html>
